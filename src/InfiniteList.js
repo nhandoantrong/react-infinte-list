@@ -33,10 +33,15 @@ class InfiniteList extends Component {
         this.itemListRef = null;
     }
 
-    handleScollToBottom() {
-        const { endList, currentMax } = this.state;
+    handleScollToBottom(scrollTop) {
+        const { currentMax, itemPosition } = this.state;
+
+        let beginList = itemPosition.findIndex((position) => position >= scrollTop);
+        if (beginList >0) beginList -= 1;
+
         this.setState({
-            endList: endList + 1, 
+            beginList,
+            endList: currentMax + 1, 
             currentMax: currentMax + 1,
         }, this.addItemHeight)
     }
@@ -46,20 +51,20 @@ class InfiniteList extends Component {
         const {currentMax} = this.state;
         const bottom = event.target.scrollHeight - event.target.scrollTop <= event.target.clientHeight * 2 + 10;
         if (bottom && currentMax <  itemList.length){
-            this.handleScollToBottom();
+            this.handleScollToBottom(event.target.scrollTop - event.target.clientHeight);
             return;
         }
         this.setListIntervalToRender(event.target.scrollTop - Math.floor(event.target.clientHeight / 2), event.target.clientHeight * 2 );
     }
 
     setListIntervalToRender = (scrollTop, clientHeight) =>{
-        const {itemPosition, endList: stateEndlist} = this.state;
+        const {itemPosition, currentMax} = this.state;
 
         let beginList = itemPosition.findIndex((position) => position >= scrollTop);
         if (beginList >0) beginList -= 1;
 
         let endList = itemPosition.findIndex((position) => position >= clientHeight + scrollTop);
-        if (endList === -1) endList = stateEndlist;
+        if (endList === -1) endList = currentMax;
 
 
         this.setState({beginList, endList})
